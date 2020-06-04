@@ -3,6 +3,7 @@ import CytoscapeComponent from "react-cytoscapejs";
 import Cytoscape from "cytoscape";
 import edgehandles from "cytoscape-edgehandles";
 import popper from "cytoscape-popper";
+import "./App.css";
 Cytoscape.use(edgehandles);
 Cytoscape.use(popper);
 export default class App extends Component {
@@ -89,16 +90,53 @@ export default class App extends Component {
     );
   };
 
+  operatorDragged = (e: any) => {
+    // let replaceOpID = 1;
+    e.dataTransfer.dropEffect = "move";
+    console.log(e.target.innerHTML);
+    e.dataTransfer.setData("text/name", e.target.innerHTML);
+    console.log(e.pageX);
+    this.cy.add({
+      group: "nodes",
+      data: { weight: 75, id: e.target.innerHTML, label: e.target.innerHTML },
+      position: { x: e.pageX - 100, y: e.pageY },
+    });
+  };
+
+  // dragover_handler = (e: any) => {
+  //   e.preventDefault();
+  //   e.dataTransfer.dropEffect = "move";
+  //   console.log("dragover_handler", e);
+  // };
+
+  // drop_handler = (e: any) => {
+  //   e.preventDefault();
+  //   // Get the id of the target and add the moved element to the target's DOM
+  //   const data = e.dataTransfer.getData("text/name");
+  //   console.log("drop_handler", data);
+  // };
   render() {
     return (
-      <div>
-        <CytoscapeComponent
-          cy={(cy: any) => {
-            this.cy = cy;
-          }}
-          elements={this.state.elements}
-          style={{ width: this.state.w, height: this.state.h }}
-        />
+      <div className="container">
+        <div className="operator-drawer">
+          <ul>
+            <li draggable="true" onDragEnd={this.operatorDragged}>
+              replace
+            </li>
+            <li>concatenate</li>
+          </ul>
+        </div>
+        <div>
+          <div>
+            <CytoscapeComponent
+              cy={(cy: any) => {
+                this.cy = cy;
+              }}
+              elements={this.state.elements}
+              style={{ width: this.state.w, height: this.state.h }}
+            />
+          </div>
+        </div>
       </div>
     );
   }
