@@ -85,7 +85,13 @@ export default class App extends Component {
         addedEles: any
       ) => {
         let { position } = event;
-        console.log("EDGE COMPLETE =====>", sourceNode, targetNode);
+        console.log(
+          "EDGE COMPLETE =====>",
+          sourceNode._private.data,
+          targetNode
+        );
+        console.log("PRESENT STATE OF THE CANVAS ", this.cy.elements().jsons());
+        // localStorage.setItem("stateOfCanvas", this.cy.elements().json);
       }
     );
   };
