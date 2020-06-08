@@ -3,12 +3,19 @@ import CytoscapeComponent from "react-cytoscapejs";
 import Cytoscape from "cytoscape";
 import edgehandles from "cytoscape-edgehandles";
 import popper from "cytoscape-popper";
+import cyCanvas from "cytoscape-canvas";
 import "./App.css";
 Cytoscape.use(edgehandles);
 Cytoscape.use(popper);
+// Cytoscape.use(cyCanvas);
+cyCanvas(Cytoscape);
 export default class App extends Component {
   cy: any;
+
+  //eh is for edge handling.i.e being able to add
+  //edges when dragging from one node to another
   eh: any;
+
   // popper: any;
   // popperRef: any;
   state = {
@@ -96,17 +103,30 @@ export default class App extends Component {
     );
   };
 
+  // When an operator node is dragged from side panel to the canvas.
+  //Creates a new node for the operator node.
   operatorDragged = (e: any) => {
     // let replaceOpID = 1;
     e.dataTransfer.dropEffect = "move";
     console.log(e.target.innerHTML);
     e.dataTransfer.setData("text/name", e.target.innerHTML);
     console.log(e.pageX);
-    this.cy.add({
+    let newOperatorNode = this.cy.add({
       group: "nodes",
       data: { weight: 75, id: e.target.innerHTML, label: e.target.innerHTML },
       position: { x: e.pageX - 100, y: e.pageY },
     });
+
+    //drawing canvas to customise operator nodes' UI
+    var layer = this.cy.cyCanvas();
+    var canvas = layer.getCanvas();
+    var ctx = canvas.getContext("2d");
+    layer.resetTransform(ctx);
+    layer.clear(ctx);
+    layer.setTransform(ctx);
+    // Draw model elements
+    var pos = newOperatorNode.position();
+    ctx.fillRect(pos.x, pos.y, 10, 10); // At node position
   };
 
   // dragover_handler = (e: any) => {
