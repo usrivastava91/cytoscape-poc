@@ -108,15 +108,22 @@ export default class App extends Component {
   operatorDragged = (e: any) => {
     // let replaceOpID = 1;
     e.dataTransfer.dropEffect = "move";
-    console.log(e.target.innerHTML);
-    e.dataTransfer.setData("text/name", e.target.innerHTML);
+    console.log(e.target.lastChild.value);
+    console.log(e.target.firstChild.innerHTML);
+
+    e.dataTransfer.setData("text/name", e.target.firstChild.innerHTML);
     console.log(e.pageX);
     let newOperatorNode = this.cy.add({
       group: "nodes",
-      data: { weight: 75, id: e.target.innerHTML, label: e.target.innerHTML },
+      data: {
+        weight: 75,
+        label: e.target.firstChild.innerHTML,
+        attribute: e.target.lastChild.value,
+      },
       position: { x: e.pageX - 100, y: e.pageY },
     });
 
+    console.log("REPLACE NODE===>", newOperatorNode);
     //drawing canvas to customise operator nodes' UI
     var layer = this.cy.cyCanvas();
     var canvas = layer.getCanvas();
@@ -126,7 +133,7 @@ export default class App extends Component {
     layer.setTransform(ctx);
     // Draw model elements
     var pos = newOperatorNode.position();
-    ctx.fillRect(pos.x, pos.y, 10, 10); // At node position
+    ctx.fillRect(pos.x - 20, pos.y - 20, 60, 30); // At node position
   };
 
   // dragover_handler = (e: any) => {
@@ -147,7 +154,8 @@ export default class App extends Component {
         <div className="operator-drawer">
           <ul>
             <li draggable="true" onDragEnd={this.operatorDragged}>
-              replace
+              <label htmlFor="replaceAttribute">Replace</label>
+              <input type="text" id="replaceAttribute" />
             </li>
             <li>concatenate</li>
           </ul>
