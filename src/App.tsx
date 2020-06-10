@@ -21,7 +21,6 @@ export default class App extends Component {
   state = {
     w: 0,
     h: 0,
-    // elements: [],
     elements: [] = [
       {
         data: { id: "one", label: "Node 1", attribute: "extra attributes" },
@@ -79,7 +78,11 @@ export default class App extends Component {
   };
   setUpListeners = () => {
     this.cy.on("click", "node", (event: any) => {
-      console.log("CLICKED NODE ", event.target);
+      // event.target._private.data.label = "changed working";
+      let node = event.target;
+
+      // node.data.label = "changed";
+      console.log("CLICKED NODE ", node.data());
       console.log("DATATATATATA", this.cy.data());
     });
 
@@ -113,27 +116,32 @@ export default class App extends Component {
 
     e.dataTransfer.setData("text/name", e.target.firstChild.innerHTML);
     console.log(e.pageX);
+    var attribute = prompt("please enter the replace attribute");
+    // console.log(attribute);
     let newOperatorNode = this.cy.add({
       group: "nodes",
       data: {
         weight: 75,
         label: e.target.firstChild.innerHTML,
-        attribute: e.target.lastChild.value,
+        type: "operator",
+        attribute: attribute,
       },
-      position: { x: e.pageX - 100, y: e.pageY },
+      position: { x: e.pageX - 200, y: e.pageY },
     });
 
     console.log("REPLACE NODE===>", newOperatorNode);
+    // newOperatorNode[0]._private.data.attribute = "changed yes"; // changing data inside the node(for custom attributes) after the node is created on drag
+
     //drawing canvas to customise operator nodes' UI
-    var layer = this.cy.cyCanvas();
-    var canvas = layer.getCanvas();
-    var ctx = canvas.getContext("2d");
-    layer.resetTransform(ctx);
-    layer.clear(ctx);
-    layer.setTransform(ctx);
-    // Draw model elements
-    var pos = newOperatorNode.position();
-    ctx.fillRect(pos.x - 20, pos.y - 20, 60, 30); // At node position
+    // var layer = this.cy.cyCanvas();
+    // var canvas = layer.getCanvas();
+    // var ctx = canvas.getContext("2d");
+    // layer.resetTransform(ctx);
+    // layer.clear(ctx);
+    // layer.setTransform(ctx);
+    // // Draw model elements
+    // var pos = newOperatorNode.position();
+    // ctx.fillRect(pos.x - 20, pos.y - 20, 60, 30); // At node position
   };
 
   // dragover_handler = (e: any) => {
@@ -155,7 +163,7 @@ export default class App extends Component {
           <ul>
             <li draggable="true" onDragEnd={this.operatorDragged}>
               <label htmlFor="replaceAttribute">Replace</label>
-              <input type="text" id="replaceAttribute" />
+              {/* <input type="text" id="replaceAttribute" /> */}
             </li>
             <li>concatenate</li>
           </ul>
