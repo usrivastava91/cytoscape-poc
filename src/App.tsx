@@ -5,6 +5,7 @@ import edgehandles from "cytoscape-edgehandles";
 import popper from "cytoscape-popper";
 import cyCanvas from "cytoscape-canvas";
 import "./App.css";
+import uuid from "./uuid";
 Cytoscape.use(edgehandles);
 Cytoscape.use(popper);
 // Cytoscape.use(cyCanvas);
@@ -23,12 +24,69 @@ export default class App extends Component {
     h: 0,
     elements: [] = [
       {
-        data: { id: "one", label: "Node 1", attribute: "extra attributes" },
-        position: { x: 101, y: 200 },
+        data: {
+          type: "operand",
+          id: uuid(),
+          label: "workerType",
+        },
+        position: { x: 100, y: 100 },
       },
-      { data: { id: "two", label: "Node 2" }, position: { x: 150, y: 200 } },
-      { data: { id: "three", label: "Node 3" }, position: { x: 270, y: 200 } },
-      { data: { id: "four", label: "Node 4" }, position: { x: 400, y: 200 } },
+      {
+        data: { type: "operand", id: uuid(), label: "workerType" },
+        position: { x: 600, y: 100 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "country" },
+        position: { x: 100, y: 200 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "country" },
+        position: { x: 600, y: 200 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "subCategory" },
+        position: { x: 100, y: 300 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "subCategory" },
+        position: { x: 600, y: 300 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "city" },
+        position: { x: 100, y: 400 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "city" },
+        position: { x: 600, y: 400 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "postalCode" },
+        position: { x: 100, y: 500 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "postalCode" },
+        position: { x: 600, y: 500 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "workHours" },
+        position: { x: 100, y: 600 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "workHours" },
+        position: { x: 600, y: 600 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "description" },
+        position: { x: 100, y: 700 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "description" },
+        position: { x: 600, y: 700 },
+      },
+      // { data: { id: uuid(), label: "timeType" }, position: { x: 100, y: 200 } },
+      // { data: { id: uuid(), label: "timeType" }, position: { x: 400, y: 200 } },
+      // { data: { id: uuid(), label: "language" }, position: { x: 400, y: 200 } },
+      // { data: { id: uuid(), label: "language" }, position: { x: 400, y: 200 } },
       // {
       //   data: {
       //     source: "one",
@@ -53,37 +111,25 @@ export default class App extends Component {
       w: window.innerWidth,
       h: window.innerHeight,
     });
-    // this.setState({
-    //   elements:
-    // })
+
     this.eh = this.cy.edgehandles();
-
-    // this.popper = this.cy.nodes()[0].popper({
-    //   content: () => {
-    //     let div = document.createElement("div");
-
-    //     div.innerHTML = "Popper content";
-
-    //     document.body.appendChild(div);
-
-    //     return div;
-    //   },
-    //   renderedPosition: () => ({ x: 100, y: 200 }),
-    //   popper: {}, // my popper options here
-    // });
-    // let popperRef1 = this.cy.nodes()[0].popperRef();
     console.log("EDGE HANDLE======>", this.eh);
     console.log("DATATATATATA", this.cy.data());
     this.setUpListeners();
   };
   setUpListeners = () => {
     this.cy.on("click", "node", (event: any) => {
-      // event.target._private.data.label = "changed working";
       let node = event.target;
 
-      // node.data.label = "changed";
-      console.log("CLICKED NODE ", node.data());
-      console.log("DATATATATATA", this.cy.data());
+      console.log("CLICKED NODE ", node.data().attribute);
+      if (node.data().label === "Replace") {
+        var attribute = prompt(
+          "please enter the replace attribute",
+          node.data().attribute
+        );
+        node.data().attribute = attribute;
+      }
+      console.log("DEGREEE", node.degree());
     });
 
     this.cy.on(
@@ -100,7 +146,16 @@ export default class App extends Component {
           sourceNode._private.data,
           targetNode
         );
+        //CHECKING IF AN OPERATOR NODE'S OUTPUT PORT IS CONNECTED TO AN OPERAND NODE & IF THE OPERATOR
+        //NODE HAS ONE OR MORE INCOMING CONNECTIONS FROM AN OPERAND NODE(S).i.e. An expression is complete
+        if (
+          sourceNode._private.data.type === "operator" &&
+          sourceNode.indegree() > 0
+        ) {
+          console.log("expression completed", sourceNode.connectedEdges());
+        }
         console.log("PRESENT STATE OF THE CANVAS ", this.cy.elements().jsons());
+        console.log("SOURCE NODE", sourceNode.indegree(false));
         // localStorage.setItem("stateOfCanvas", this.cy.elements().json);
       }
     );
@@ -109,63 +164,37 @@ export default class App extends Component {
   // When an operator node is dragged from side panel to the canvas.
   //Creates a new node for the operator node.
   operatorDragged = (e: any) => {
-    // let replaceOpID = 1;
     e.dataTransfer.dropEffect = "move";
-    console.log(e.target.lastChild.value);
-    console.log(e.target.firstChild.innerHTML);
 
-    e.dataTransfer.setData("text/name", e.target.firstChild.innerHTML);
+    e.dataTransfer.setData("text/name", e.target.innerHTML);
     console.log(e.pageX);
     var attribute = prompt("please enter the replace attribute");
     // console.log(attribute);
     let newOperatorNode = this.cy.add({
       group: "nodes",
       data: {
+        id: uuid(),
         weight: 75,
-        label: e.target.firstChild.innerHTML,
+        label: e.target.innerHTML,
         type: "operator",
         attribute: attribute,
       },
       position: { x: e.pageX - 200, y: e.pageY },
     });
-
     console.log("REPLACE NODE===>", newOperatorNode);
-    // newOperatorNode[0]._private.data.attribute = "changed yes"; // changing data inside the node(for custom attributes) after the node is created on drag
-
-    //drawing canvas to customise operator nodes' UI
-    // var layer = this.cy.cyCanvas();
-    // var canvas = layer.getCanvas();
-    // var ctx = canvas.getContext("2d");
-    // layer.resetTransform(ctx);
-    // layer.clear(ctx);
-    // layer.setTransform(ctx);
-    // // Draw model elements
-    // var pos = newOperatorNode.position();
-    // ctx.fillRect(pos.x - 20, pos.y - 20, 60, 30); // At node position
   };
 
-  // dragover_handler = (e: any) => {
-  //   e.preventDefault();
-  //   e.dataTransfer.dropEffect = "move";
-  //   console.log("dragover_handler", e);
-  // };
-
-  // drop_handler = (e: any) => {
-  //   e.preventDefault();
-  //   // Get the id of the target and add the moved element to the target's DOM
-  //   const data = e.dataTransfer.getData("text/name");
-  //   console.log("drop_handler", data);
-  // };
   render() {
     return (
       <div className="container">
         <div className="operator-drawer">
           <ul>
             <li draggable="true" onDragEnd={this.operatorDragged}>
-              <label htmlFor="replaceAttribute">Replace</label>
-              {/* <input type="text" id="replaceAttribute" /> */}
+              Replace
             </li>
-            <li>concatenate</li>
+            <li draggable="true" onDragEnd={this.operatorDragged}>
+              concatenate
+            </li>
           </ul>
         </div>
         <div>
@@ -174,8 +203,91 @@ export default class App extends Component {
               cy={(cy: any) => {
                 this.cy = cy;
               }}
-              elements={this.state.elements}
+              elements={CytoscapeComponent.normalizeElements(
+                this.state.elements
+              )}
               style={{ width: this.state.w, height: this.state.h }}
+              stylesheet={[
+                {
+                  selector: "node",
+                  style: {
+                    label: "data(label)",
+                  },
+                },
+                {
+                  selector: " node[type = 'operand']",
+                  style: {
+                    shape: "round-rectangle",
+                    content: "data(label)",
+                    width: "50px",
+                    "background-color": "#b6d2e2",
+                    "border-color": "#01b2c0",
+                    "border-width": "2px",
+                  },
+                },
+                {
+                  selector: " node[type = 'operator']",
+                  style: {
+                    shape: "octagon",
+                    "background-color": "blue",
+                  },
+                },
+                {
+                  selector: "edge",
+                  style: {
+                    "curve-style": "bezier",
+                    "target-arrow-shape": "triangle",
+                  },
+                },
+                {
+                  selector: ".eh-handle",
+                  style: {
+                    "background-color": "red",
+                    width: 12,
+                    height: 12,
+                    shape: "ellrecipse",
+                    "overlay-opacity": 0,
+                    "border-width": 12, // makes the handle easier to hit
+                    "border-opacity": 0,
+                  },
+                },
+                {
+                  selector: ".eh-hover",
+                  style: {
+                    "background-color": "red",
+                  },
+                },
+                {
+                  selector: ".eh-source",
+                  style: {
+                    "border-width": 2,
+                    "border-color": "red",
+                  },
+                },
+                {
+                  selector: ".eh-target",
+                  style: {
+                    "border-width": 2,
+                    "border-color": "red",
+                  },
+                },
+                {
+                  selector: ".eh-preview, .eh-ghost-edge",
+                  style: {
+                    "background-color": "red",
+                    "line-color": "red",
+                    "target-arrow-color": "red",
+                    "source-arrow-color": "red",
+                    "target-arrow-shape": "triangle",
+                  },
+                },
+                {
+                  selector: ".eh-ghost-edge.eh-preview-active",
+                  style: {
+                    opacity: 0,
+                  },
+                },
+              ]}
             />
           </div>
         </div>
