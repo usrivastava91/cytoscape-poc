@@ -150,38 +150,32 @@ export default class App extends Component {
             targetNode.outdegree() > 0)
         ) {
           console.log("EXPRESSION COMPLETE");
+          let operatorNode =
+            sourceNode._private.data.type === "operator"
+              ? sourceNode
+              : targetNode._private.data.type === "operator"
+              ? targetNode
+              : "";
+          let inputNodes = operatorNode.incomers().filter((element: any) => {
+            return element._private.group === "nodes";
+          });
+          let outputNodes = operatorNode.outgoers().filter((element: any) => {
+            return element._private.group === "nodes";
+          });
 
-          if (sourceNode._private.data.type === "operator") {
-            // Filtering edges added by eh-handle extension
-            let edges = sourceNode.connectedEdges().filter((edge: any) => {
-              return edge._private.classes.size == 0;
-            });
-            let inputNode = sourceNode.incomers()[1]._private.data;
-            let operatorNode = sourceNode._private.data;
-            let outputNode = targetNode._private.data;
-            console.log("edges in the expression =========> ", edges);
-            console.log(
-              "nodes in the expression",
-              inputNode,
-              operatorNode,
-              outputNode
-            );
-          } else if (targetNode._private.data.type === "operator") {
-            // Filtering edges added by eh-handle extension
-            let edges = targetNode.connectedEdges().filter((edge: any) => {
-              return edge._private.classes.size == 0;
-            });
-            let inputNode = sourceNode._private.data;
-            let operatorNode = targetNode._private.data;
-            let outputNode = targetNode.outgoers()[1]._private.data;
-            console.log("edges in the expression =========> ", edges);
-            console.log(
-              "nodes in the expression",
-              inputNode,
-              operatorNode,
-              outputNode
-            );
-          }
+          let totalNodes = [...inputNodes, ...outputNodes, operatorNode].filter(
+            (node) => {
+              return !node._private.classes.has("eh-ghost");
+            }
+          );
+
+          // Filtering edges added by eh-handle extension
+          let totalEdges = operatorNode.connectedEdges().filter((edge: any) => {
+            return edge._private.classes.size == 0;
+          });
+
+          console.log("edges in the expression =========> ", totalEdges);
+          console.log("nodes in the expression", totalNodes);
         }
         console.log("PRESENT STATE OF THE CANVAS ", this.cy.elements().jsons());
       }
