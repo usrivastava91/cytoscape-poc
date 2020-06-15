@@ -43,46 +43,46 @@ export default class App extends Component {
         data: { type: "operand", id: uuid(), label: "country" },
         position: { x: 600, y: 200 },
       },
-      {
-        data: { type: "operand", id: uuid(), label: "subCategory" },
-        position: { x: 100, y: 300 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "subCategory" },
-        position: { x: 600, y: 300 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "city" },
-        position: { x: 100, y: 400 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "city" },
-        position: { x: 600, y: 400 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "postalCode" },
-        position: { x: 100, y: 500 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "postalCode" },
-        position: { x: 600, y: 500 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "workHours" },
-        position: { x: 100, y: 600 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "workHours" },
-        position: { x: 600, y: 600 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "description" },
-        position: { x: 100, y: 700 },
-      },
-      {
-        data: { type: "operand", id: uuid(), label: "description" },
-        position: { x: 600, y: 700 },
-      },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "subCategory" },
+      //   position: { x: 100, y: 300 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "subCategory" },
+      //   position: { x: 600, y: 300 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "city" },
+      //   position: { x: 100, y: 400 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "city" },
+      //   position: { x: 600, y: 400 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "postalCode" },
+      //   position: { x: 100, y: 500 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "postalCode" },
+      //   position: { x: 600, y: 500 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "workHours" },
+      //   position: { x: 100, y: 600 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "workHours" },
+      //   position: { x: 600, y: 600 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "description" },
+      //   position: { x: 100, y: 700 },
+      // },
+      // {
+      //   data: { type: "operand", id: uuid(), label: "description" },
+      //   position: { x: 600, y: 700 },
+      // },
       // { data: { id: uuid(), label: "timeType" }, position: { x: 100, y: 200 } },
       // { data: { id: uuid(), label: "timeType" }, position: { x: 400, y: 200 } },
       // { data: { id: uuid(), label: "language" }, position: { x: 400, y: 200 } },
@@ -140,23 +140,50 @@ export default class App extends Component {
         targetNode: any,
         addedEles: any
       ) => {
-        let { position } = event;
-        console.log(
-          "EDGE COMPLETE =====>",
-          sourceNode._private.data,
-          targetNode
-        );
+        console.log(targetNode._private.data.type, targetNode.indegree());
         //CHECKING IF AN OPERATOR NODE'S OUTPUT PORT IS CONNECTED TO AN OPERAND NODE & IF THE OPERATOR
         //NODE HAS ONE OR MORE INCOMING CONNECTIONS FROM AN OPERAND NODE(S).i.e. An expression is complete
         if (
-          sourceNode._private.data.type === "operator" &&
-          sourceNode.indegree() > 0
+          (sourceNode._private.data.type === "operator" &&
+            sourceNode.indegree() > 0) ||
+          (targetNode._private.data.type === "operator" &&
+            targetNode.outdegree() > 0)
         ) {
-          console.log("expression completed", sourceNode.connectedEdges());
+          console.log("EXPRESSION COMPLETE");
+
+          if (sourceNode._private.data.type === "operator") {
+            // Filtering edges added by eh-handle extension
+            let edges = sourceNode.connectedEdges().filter((edge: any) => {
+              return edge._private.classes.size == 0;
+            });
+            let inputNode = sourceNode.incomers()[1]._private.data;
+            let operatorNode = sourceNode._private.data;
+            let outputNode = targetNode._private.data;
+            console.log("edges in the expression =========> ", edges);
+            console.log(
+              "nodes in the expression",
+              inputNode,
+              operatorNode,
+              outputNode
+            );
+          } else if (targetNode._private.data.type === "operator") {
+            // Filtering edges added by eh-handle extension
+            let edges = targetNode.connectedEdges().filter((edge: any) => {
+              return edge._private.classes.size == 0;
+            });
+            let inputNode = sourceNode._private.data;
+            let operatorNode = targetNode._private.data;
+            let outputNode = targetNode.outgoers()[1]._private.data;
+            console.log("edges in the expression =========> ", edges);
+            console.log(
+              "nodes in the expression",
+              inputNode,
+              operatorNode,
+              outputNode
+            );
+          }
         }
         console.log("PRESENT STATE OF THE CANVAS ", this.cy.elements().jsons());
-        console.log("SOURCE NODE", sourceNode.indegree(false));
-        // localStorage.setItem("stateOfCanvas", this.cy.elements().json);
       }
     );
   };
@@ -181,7 +208,7 @@ export default class App extends Component {
       },
       position: { x: e.pageX - 200, y: e.pageY },
     });
-    console.log("REPLACE NODE===>", newOperatorNode);
+    // console.log("REPLACE NODE===>", newOperatorNode);
   };
 
   render() {
