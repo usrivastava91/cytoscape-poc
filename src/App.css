@@ -40,9 +40,18 @@
 .container {
   display: flex;
 }
-
+.operator-drawer {
+  margin: 20px;
+  height: 100vh;
+  background: grey;
+  border-radius: 5px;
+}
 li {
-  background-color: blue;
-  border: 2px solid black;
-  margin: 5px;
+  background-color: #61dafb;
+  text-align: center;
+  border-radius: 3px;
+  padding: 3px;
+  margin-top: 20px;
+  margin-right: 28px;
+  list-style-type: none;
 }

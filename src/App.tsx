@@ -16,9 +16,8 @@ export default class App extends Component {
   //eh is for edge handling.i.e being able to add
   //edges when dragging from one node to another
   eh: any;
-
-  // popper: any;
-  // popperRef: any;
+  singleExpressionGraph: any = {};
+  expressionGraphs: any = [];
   state = {
     w: 0,
     h: 0,
@@ -140,7 +139,6 @@ export default class App extends Component {
         targetNode: any,
         addedEles: any
       ) => {
-        console.log(targetNode._private.data.type, targetNode.indegree());
         //CHECKING IF AN OPERATOR NODE'S OUTPUT PORT IS CONNECTED TO AN OPERAND NODE & IF THE OPERATOR
         //NODE HAS ONE OR MORE INCOMING CONNECTIONS FROM AN OPERAND NODE(S).i.e. An expression is complete
         if (
@@ -163,21 +161,27 @@ export default class App extends Component {
             return element._private.group === "nodes";
           });
 
-          let totalNodes = [...inputNodes, ...outputNodes, operatorNode].filter(
-            (node) => {
+          // Filtering out nodes added by eh-handle extension
+          let nodes = [...inputNodes, ...outputNodes, operatorNode]
+            .filter((node) => {
               return !node._private.classes.has("eh-ghost");
-            }
-          );
+            })
+            .map((node: any) => node._private.data);
 
-          // Filtering edges added by eh-handle extension
-          let totalEdges = operatorNode.connectedEdges().filter((edge: any) => {
-            return edge._private.classes.size == 0;
-          });
+          // Filtering out edges added by eh-handle extension
+          let edges = operatorNode
+            .connectedEdges()
+            .filter((edge: any) => {
+              return edge._private.classes.size == 0;
+            })
+            .map((edge: any) => edge._private.data);
 
-          console.log("edges in the expression =========> ", totalEdges);
-          console.log("nodes in the expression", totalNodes);
+          console.log("edges in the expression =========> ", edges);
+          console.log("nodes in the expression", nodes);
+          this.singleExpressionGraph = { edges, nodes };
+          console.log("expression graph=======>", this.singleExpressionGraph);
         }
-        console.log("PRESENT STATE OF THE CANVAS ", this.cy.elements().jsons());
+        // console.log("PRESENT STATE OF THE CANVAS ", this.cy.elements().jsons());
       }
     );
   };
@@ -185,17 +189,24 @@ export default class App extends Component {
   // When an operator node is dragged from side panel to the canvas.
   //Creates a new node for the operator node.
   operatorDragged = (e: any) => {
+    this.expressionGraphs.push(this.singleExpressionGraph);
+    console.log("EXPRESSION GRAPHS=====>", this.expressionGraphs);
     e.dataTransfer.dropEffect = "move";
-
-    e.dataTransfer.setData("text/name", e.target.innerHTML);
-    console.log(e.pageX);
-    var attribute = prompt("please enter the replace attribute");
-    // console.log(attribute);
+    let attribute;
+    // e.dataTransfer.setData("text/name", e.target.innerHTML);
+    switch (e.target.innerHTML) {
+      case "Replace":
+        attribute = prompt("Please enter the replace attribute");
+        break;
+      case "Concatenate":
+        attribute = prompt(
+          "Please mention the fields in the order you want them to concatenate in, followed by a space"
+        );
+    }
     let newOperatorNode = this.cy.add({
       group: "nodes",
       data: {
         id: uuid(),
-        weight: 75,
         label: e.target.innerHTML,
         type: "operator",
         attribute: attribute,
@@ -214,7 +225,7 @@ export default class App extends Component {
               Replace
             </li>
             <li draggable="true" onDragEnd={this.operatorDragged}>
-              concatenate
+              Concatenate
             </li>
           </ul>
         </div>
