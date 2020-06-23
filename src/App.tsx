@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import { Modal, Button } from "react-bootstrap";
+import { Form, Field } from "react-final-form";
 import CytoscapeComponent from "react-cytoscapejs";
 import Cytoscape from "cytoscape";
 import edgehandles from "cytoscape-edgehandles";
@@ -11,14 +13,19 @@ Cytoscape.use(popper);
 // Cytoscape.use(cyCanvas);
 cyCanvas(Cytoscape);
 export default class App extends Component {
+  addedOperatorX: any;
+  addedOperatorY: any;
+  addedOperatorName: any;
   cy: any;
-
+  attributeFields: any;
   //eh is for edge handling.i.e being able to add
   //edges when dragging from one node to another
   eh: any;
   singleExpressionGraph: any = {};
   expressionGraphs: any = [];
   state = {
+    attributes: {},
+    showAttributeForm: false,
     w: 0,
     h: 0,
     elements: [] = [
@@ -42,46 +49,46 @@ export default class App extends Component {
         data: { type: "operand", id: uuid(), label: "country" },
         position: { x: 600, y: 200 },
       },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "subCategory" },
-      //   position: { x: 100, y: 300 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "subCategory" },
-      //   position: { x: 600, y: 300 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "city" },
-      //   position: { x: 100, y: 400 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "city" },
-      //   position: { x: 600, y: 400 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "postalCode" },
-      //   position: { x: 100, y: 500 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "postalCode" },
-      //   position: { x: 600, y: 500 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "workHours" },
-      //   position: { x: 100, y: 600 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "workHours" },
-      //   position: { x: 600, y: 600 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "description" },
-      //   position: { x: 100, y: 700 },
-      // },
-      // {
-      //   data: { type: "operand", id: uuid(), label: "description" },
-      //   position: { x: 600, y: 700 },
-      // },
+      {
+        data: { type: "operand", id: uuid(), label: "subCategory" },
+        position: { x: 100, y: 300 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "subCategory" },
+        position: { x: 600, y: 300 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "city" },
+        position: { x: 100, y: 400 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "city" },
+        position: { x: 600, y: 400 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "postalCode" },
+        position: { x: 100, y: 500 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "postalCode" },
+        position: { x: 600, y: 500 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "workHours" },
+        position: { x: 100, y: 600 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "workHours" },
+        position: { x: 600, y: 600 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "description" },
+        position: { x: 100, y: 700 },
+      },
+      {
+        data: { type: "operand", id: uuid(), label: "description" },
+        position: { x: 600, y: 700 },
+      },
       // { data: { id: uuid(), label: "timeType" }, position: { x: 100, y: 200 } },
       // { data: { id: uuid(), label: "timeType" }, position: { x: 400, y: 200 } },
       // { data: { id: uuid(), label: "language" }, position: { x: 400, y: 200 } },
@@ -190,35 +197,114 @@ export default class App extends Component {
   //Creates a new node for the operator node.
   operatorDragged = (e: any) => {
     this.expressionGraphs.push(this.singleExpressionGraph);
+    console.log("STATE============================", this.state.attributes);
+    this.setState({ showAttributeForm: true });
     console.log("EXPRESSION GRAPHS=====>", this.expressionGraphs);
     e.dataTransfer.dropEffect = "move";
+    this.addedOperatorX = e.pageX;
+    this.addedOperatorY = e.pageY;
+    this.addedOperatorName = e.target.innerHTML;
     let attribute;
     // e.dataTransfer.setData("text/name", e.target.innerHTML);
     switch (e.target.innerHTML) {
       case "Replace":
-        attribute = prompt("Please enter the replace attribute");
+        // attribute = prompt("Please enter the replace attribute");
+        this.attributeFields = [
+          { field: "original property" },
+          { field: "replace property" },
+        ];
         break;
       case "Concatenate":
-        attribute = prompt(
-          "Please mention the fields in the order you want them to concatenate in, followed by a space"
-        );
+        // attribute = prompt(
+        //   "Please mention the fields in the order you want them to concatenate in, followed by a space"
+        // );
+        this.attributeFields = [
+          { field: "first property" },
+          { field: "second property" },
+        ];
     }
+
+    // let newOperatorNode = this.cy.add({
+    //   group: "nodes",
+    //   data: {
+    //     id: uuid(),
+    //     label: e.target.innerHTML,
+    //     type: "operator",
+    //     attribute: attribute,
+    //   },
+    //   position: { x: e.pageX - 200, y: e.pageY },
+    // });
+  };
+  handleClose = () => this.setState({ showAttributeForm: false });
+  // handleShow = () => setShow(true);
+  onSubmit = async (values: any) => {
+    console.log("attributes", values);
+    this.setState({ attributes: values });
     let newOperatorNode = this.cy.add({
       group: "nodes",
       data: {
         id: uuid(),
-        label: e.target.innerHTML,
+        label: this.addedOperatorName,
         type: "operator",
-        attribute: attribute,
+        attribute: values,
       },
-      position: { x: e.pageX - 200, y: e.pageY },
+      position: { x: this.addedOperatorX - 200, y: this.addedOperatorY },
     });
-    // console.log("REPLACE NODE===>", newOperatorNode);
-  };
 
+    console.log("NEW OPERATOR ====================>", newOperatorNode);
+    this.setState({ showAttributeForm: false });
+  };
   render() {
     return (
       <div className="container">
+        {/* <Modal show={this.state.showAttributeForm} onHide={this.handleClose}>
+          <Modal.Header closeButton>
+            <Modal.Title>Modal heading</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={this.handleClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={this.handleClose}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal> */}
+        {this.state.showAttributeForm ? (
+          <div className="attribute-form">
+            <Form
+              onSubmit={this.onSubmit}
+              render={({
+                handleSubmit,
+                form,
+                submitting,
+                pristine,
+                values,
+              }) => (
+                <form onSubmit={handleSubmit}>
+                  {this.attributeFields.map((attr: any) => {
+                    return (
+                      <div>
+                        <label htmlFor="">{attr.field}</label>
+                        <Field
+                          name={attr.field}
+                          component="input"
+                          type="text"
+                          placeholder={attr.field}
+                        />
+                      </div>
+                    );
+                  })}
+                  <input type="submit" value="Submit" />
+                </form>
+              )}
+            />
+          </div>
+        ) : (
+          ""
+        )}
+
         <div className="operator-drawer">
           <ul>
             <li draggable="true" onDragEnd={this.operatorDragged}>
