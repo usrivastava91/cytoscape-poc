@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Modal, Button } from "react-bootstrap";
+// import { Modal, Button } from "react-bootstrap";
 import { Form, Field } from "react-final-form";
 import CytoscapeComponent from "react-cytoscapejs";
 import Cytoscape from "cytoscape";
@@ -8,6 +8,16 @@ import popper from "cytoscape-popper";
 import cyCanvas from "cytoscape-canvas";
 import "./App.css";
 import uuid from "./uuid";
+
+import Button from "@material-ui/core/Button";
+import TextField from "@material-ui/core/TextField";
+import Dialog from "@material-ui/core/Dialog";
+import DialogActions from "@material-ui/core/DialogActions";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogContentText from "@material-ui/core/DialogContentText";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import { FormControl } from "@material-ui/core";
+
 Cytoscape.use(edgehandles);
 Cytoscape.use(popper);
 // Cytoscape.use(cyCanvas);
@@ -236,7 +246,6 @@ export default class App extends Component {
     // });
   };
   handleClose = () => this.setState({ showAttributeForm: false });
-  // handleShow = () => setShow(true);
   onSubmit = async (values: any) => {
     console.log("attributes", values);
     this.setState({ attributes: values });
@@ -257,22 +266,13 @@ export default class App extends Component {
   render() {
     return (
       <div className="container">
-        {/* <Modal show={this.state.showAttributeForm} onHide={this.handleClose}>
-          <Modal.Header closeButton>
-            <Modal.Title>Modal heading</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>Woohoo, you're reading this text in a modal!</Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleClose}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={this.handleClose}>
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Modal> */}
-        {this.state.showAttributeForm ? (
-          <div className="attribute-form">
+        <Dialog
+          open={this.state.showAttributeForm}
+          onClose={this.handleClose}
+          aria-labelledby="form-dialog-title"
+        >
+          <DialogTitle id="form-dialog-title">Enter Atttributes</DialogTitle>
+          <DialogContent>
             <Form
               onSubmit={this.onSubmit}
               render={({
@@ -285,26 +285,48 @@ export default class App extends Component {
                 <form onSubmit={handleSubmit}>
                   {this.attributeFields.map((attr: any) => {
                     return (
-                      <div>
-                        <label htmlFor="">{attr.field}</label>
-                        <Field
-                          name={attr.field}
-                          component="input"
-                          type="text"
-                          placeholder={attr.field}
-                        />
-                      </div>
+                      // <div>
+                      //   <label htmlFor="">{attr.field}</label>
+                      //   <Field
+                      //     name={attr.field}
+                      //     component="input"
+                      //     type="text"
+                      //     placeholder={attr.field}
+                      //   />
+                      // </div>
+                      <Field
+                        className="attribute-form-fields"
+                        name={attr.field}
+                        render={({ input }) => {
+                          return (
+                            <FormControl>
+                              <label htmlFor={attr.field}>{attr.field}</label>
+                              <TextField
+                                id={attr.field}
+                                variant="outlined"
+                                size="small"
+                                {...input}
+                              />
+                            </FormControl>
+                          );
+                        }}
+                      />
                     );
                   })}
                   <input type="submit" value="Submit" />
                 </form>
               )}
             />
-          </div>
-        ) : (
-          ""
-        )}
-
+          </DialogContent>
+          {/* <DialogActions>
+            <Button onClick={this.handleClose} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={this.handleClose} color="primary">
+              Subscribe
+            </Button>
+          </DialogActions> */}
+        </Dialog>
         <div className="operator-drawer">
           <ul>
             <li draggable="true" onDragEnd={this.operatorDragged}>

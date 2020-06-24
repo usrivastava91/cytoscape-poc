@@ -55,3 +55,8 @@ li {
   margin-right: 28px;
   list-style-type: none;
 }
+
+.MuiFormControl-root {
+  /* margin-left: 10px !important; */
+  display: block !important;
+}
